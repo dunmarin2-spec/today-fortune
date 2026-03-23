@@ -3,128 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🇰🇷 실시간 보도: 오늘의 운세</title>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
+    <title>🇰🇷 리춘희의 무한 보도: 오늘의 운세</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
         :root { --point-color: #d63031; --bg-color: #ffffff; }
-        body { margin: 0; font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        body { margin: 0; font-family: 'Pretendard', sans-serif; background-color: var(--bg-color); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
 
-        .header { width: 100%; background: var(--point-color); color: white; text-align: center; padding: 15px 0; font-weight: 900; font-size: 1.2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .container { width: 90%; max-width: 400px; background: white; padding: 30px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: center; border: 1px solid #f1f2f6; }
         
-        /* 메인 컨테이너 */
-        .main-container { width: 100%; max-width: 600px; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 20px; }
+        /* 리춘희 애니메이션 영역 */
+        .lee-box { position: relative; width: 150px; height: 150px; margin: 0 auto 20px; overflow: hidden; border-radius: 50%; border: 4px solid var(--point-color); background: #eee; }
+        .lee-img { width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: none; }
+        .lee-img.active { display: block; }
 
-        /* 카메라 & 필터 영역 */
-        .camera-box { position: relative; width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 20px; overflow: hidden; border: 5px solid #f1f2f6; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        #input_video { display: none; }
-        #output_canvas { width: 100%; height: 100%; object-fit: cover; }
+        h1 { font-size: 1.6rem; font-weight: 900; margin-bottom: 20px; color: #2d3436; }
+        h1 span { color: var(--point-color); }
 
-        /* 운세 결과창 */
-        .ui-box { width: 100%; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; border: 1px solid #eee; }
-        #result-display { display: none; margin-bottom: 20px; animation: fadeIn 0.5s ease; }
-        .fortune-title { color: var(--point-color); font-weight: 800; font-size: 1.3rem; margin-bottom: 10px; }
-        .fortune-text { font-size: 1.15rem; font-weight: 600; line-height: 1.6; color: #2d3436; word-break: keep-all; }
+        #result-box { display: none; margin-top: 15px; padding: 20px; background: #fff5f5; border-radius: 15px; border: 1px dashed var(--point-color); animation: fadeIn 0.4s ease; }
+        .result-text { font-size: 1.1rem; font-weight: 700; color: #2d3436; line-height: 1.5; word-break: keep-all; }
 
-        button { width: 100%; background: var(--point-color); color: white; border: none; padding: 20px; border-radius: 15px; font-size: 1.2rem; font-weight: 800; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(214, 48, 49, 0.3); }
-        button:hover { transform: translateY(-3px); background: #b71c1c; }
+        button { width: 100%; background: var(--point-color); color: white; border: none; padding: 18px; border-radius: 15px; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(214, 48, 49, 0.3); margin-top: 15px; }
+        button:active { transform: scale(0.98); }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div class="header">조선중앙TV 특별보도국</div>
-
-    <div class="main-container">
-        <div class="camera-box">
-            <video id="input_video" autoplay></video>
-            <canvas id="output_canvas"></canvas>
+    <div class="container">
+        <div class="lee-box">
+            <img src="lee_close.png" id="img-close" class="lee-img active">
+            <img src="lee_open.png" id="img-open" class="lee-img">
         </div>
 
-        <div class="ui-box">
-            <div id="result-display">
-                <div class="fortune-title">📢 오늘의 령도적 보도</div>
-                <div id="fortune-content" class="fortune-text"></div>
-            </div>
-            <button onclick="publishFortune()">운세 보도 시작 (딸깍!)</button>
-            <p style="font-size: 0.8rem; color: #aaa; margin-top: 15px;">※ 입을 벌리면 리춘희 아나운서도 함께 외칩네다!</p>
+        <h1>🇰🇷 리춘희의<br><span>오늘의 운세</span> 보도</h1>
+
+        <div id="result-box">
+            <div id="fortune-text" class="result-text"></div>
         </div>
+
+        <button onclick="showFortune()">보도 시작하라우! (딸깍)</button>
     </div>
 
     <script>
-        const videoElement = document.getElementById('input_video');
-        const canvasElement = document.getElementById('output_canvas');
-        const canvasCtx = canvasElement.getContext('2d');
-        const fortuneContent = document.getElementById('fortune-content');
-        const resultDisplay = document.getElementById('result-display');
+        // 1. 입 벙긋 애니메이션 (0.2초마다 교체)
+        const closeImg = document.getElementById('img-close');
+        const openImg = document.getElementById('img-open');
+        
+        setInterval(() => {
+            closeImg.classList.toggle('active');
+            openImg.classList.toggle('active');
+        }, 200); // 0.2초 간격으로 입을 벙긋거립니다
 
-        // 이미지 로드
-        const imgClose = new Image(); imgClose.src = 'lee_close.png';
-        const imgOpen = new Image(); imgOpen.src = 'lee_open.png';
-
+        // 2. 운세 데이터
         const fortunes = [
-            "동무! 오늘 남쪽에서 귀인이 올라와 고구마를 건넬 운세입네다!",
+            "동무! 오늘 남쪽에서 귀인이 고구마를 건넬 운세입네다!",
             "오늘은 대길입네다! 쌀 한 가마니를 줍는 격이니 어깨를 펴십쇼!",
-            "일없습네다! 어떤 난관도 동무의 굳센 의지로 다 물리칠 수 있습네다!",
-            "혁명적인 하루입네다! 점심 식사 메뉴 선택에서 대승리할 운세입네다!",
-            "동무, 오늘은 말조심하십쇼! 옆집 순이가 동무를 지켜보고 있습네다!",
-            "오늘의 행운 색은 붉은색! 붉은 옷을 입고 전진, 또 전진하십쇼!",
-            "동무의 열정이 폭포수처럼 쏟아져 오늘 할 일을 다 끝낼 운세입네다!",
-            "강성대국도 잠은 자야 만드는 법! 오늘은 푹 쉬어가는 날입네다.",
-            "뜻밖의 장소에서 동지를 만나 술 한잔 기울일 기막힌 운세입네다!"
+            "일없습네다! 어떤 난관도 동무의 의지로 물리칠 수 있습네다!",
+            "혁명적인 하루입네다! 점심 메뉴 선택에서 대승리할 운세!",
+            "동무, 오늘 행운의 색은 붉은색! 전진, 또 전진하십쇼!",
+            "강성대국도 잠은 자야 만드는 법! 오늘은 푹 쉬는 날입네다."
         ];
 
-        function publishFortune() {
-            const randomIdx = Math.floor(Math.random() * fortunes.length);
-            fortuneContent.innerText = fortunes[randomIdx];
-            resultDisplay.style.display = 'block';
+        function showFortune() {
+            const text = document.getElementById('fortune-text');
+            const box = document.getElementById('result-box');
+            text.innerText = fortunes[Math.floor(Math.random() * fortunes.length)];
+            box.style.display = 'block';
         }
-
-        // FaceMesh 설정
-        const faceMesh = new FaceMesh({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`});
-        faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
-        faceMesh.onResults(onResults);
-
-        function onResults(results) {
-            canvasCtx.save();
-            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-            
-            // 거울 모드로 카메라 그리기
-            canvasCtx.translate(canvasElement.width, 0);
-            canvasCtx.scale(-1, 1);
-            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-            canvasCtx.setTransform(1, 0, 0, 1, 0, 0); // 초기화
-
-            if (results.multiFaceLandmarks && imgClose.complete && imgOpen.complete) {
-                for (const landmarks of results.multiFaceLandmarks) {
-                    // 입 벌림 감지 (13번: 윗입술 안쪽, 14번: 아랫입술 안쪽)
-                    const upperLip = landmarks[13];
-                    const lowerLip = landmarks[14];
-                    const dist = Math.abs(upperLip.y - lowerLip.y);
-                    
-                    // 입 벌림 기준 (0.015 이상이면 벌린 것으로 간주)
-                    const currentImg = dist > 0.015 ? imgOpen : imgClose;
-
-                    // 리춘희 아나운서 위치 (화면 우측 하단에 조그맣게 보도석 설치)
-                    const size = 180;
-                    canvasCtx.drawImage(currentImg, canvasElement.width - size - 10, canvasElement.height - size - 10, size, size);
-                }
-            }
-            canvasCtx.restore();
-        }
-
-        const camera = new Camera(videoElement, {
-            onFrame: async () => { await faceMesh.send({image: videoElement}); },
-            width: 640, height: 480
-        });
-        camera.start();
-
-        videoElement.onloadedmetadata = () => {
-            canvasElement.width = 640;
-            canvasElement.height = 480;
-        };
     </script>
 </body>
 </html>
